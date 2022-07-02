@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Elden Ring File Analysis Tool", "Elden Ring File Analysis Tool\Elden Ring File Analysis Tool.csproj", "{235E4C64-355D-42AD-BFFF-F25D461430F0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SoulsFormats", "SoulsFormats\SoulsFormats\SoulsFormats.csproj", "{E440133E-3F33-419C-89F7-B800276D6C5B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{235E4C64-355D-42AD-BFFF-F25D461430F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{235E4C64-355D-42AD-BFFF-F25D461430F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{235E4C64-355D-42AD-BFFF-F25D461430F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{235E4C64-355D-42AD-BFFF-F25D461430F0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E440133E-3F33-419C-89F7-B800276D6C5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E440133E-3F33-419C-89F7-B800276D6C5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E440133E-3F33-419C-89F7-B800276D6C5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E440133E-3F33-419C-89F7-B800276D6C5B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4C9C1B51-6429-4FED-AA2F-3ECB20369024}
+	EndGlobalSection
+EndGlobal
