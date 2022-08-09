@@ -11,14 +11,19 @@ namespace Elden_Ring_File_Analysis_Tool
     {
         public static void Main(string[] args)
         {
-            args = new string[] { @"G:\Steam\steamapps\common\ELDEN RING 1.05\Game\eldenring.exe", "-m", "PSC\0" };
-#if DEBUG
-            args = new string[] { @"G:\Steam\steamapps\common\ELDEN RING 1.05\Game\eldenring.exe", "-m" ,"PSC\0" };
-#endif
+            if (args.Length < 1)
+            {
+                ShowUsage();
+                return;
+            }
+
             string gamePath = Path.GetDirectoryName(args[0]);
 
             if (!File.Exists(args[0]) || gamePath == null)
+            {
                 ShowUsage();
+                return;
+            }
 
             if (!File.Exists("oo2core_6_win64.dll"))
                 File.Copy($"{gamePath}/oo2core_6_win64.dll", $"{Environment.CurrentDirectory}/oo2core_6_win64.dll");
@@ -34,28 +39,46 @@ namespace Elden_Ring_File_Analysis_Tool
                     break;
                 case "-m":
                     if (args.Length < 3) { ShowUsage(); return; }
-                    FileMagicSearch(gamePath, args[2]);
+                    FileMagicSearch(gamePath, args[2], false);
+                    break;
+                case "-mb":
+                    if (args.Length < 3) { ShowUsage(); return; }
+                    FileMagicSearch(gamePath, args[2], true);
+                    break;
+                case "-b":
+                    if (args.Length < 3) { ShowUsage(); return; }
+                    BNDSearch(gamePath, args[2], false);
+                    break;
+                case "-be":
+                    if (args.Length < 3) { ShowUsage(); return; }
+                    BNDSearch(gamePath, args[2], true);
                     break;
                 default:
+                    ShowUsage();
                     break;
             }
 
+            Console.WriteLine("Operation complete.");
             Console.ReadLine();
         }
 
 
         private static void ShowUsage()
         {
-            Console.WriteLine("Arg 1: eldenring.exe path. \n" +
+            Console.WriteLine("Arg1: eldenring.exe path. \n" +
                 "Arg2: switch:\n" +
-                    "\t-p: Path match. provide a path as Arg3 to be hashed and matched against files in Game\\_unknown\n" +
-                    "\t-efl: Hash blast the Game\\map\\entryfilelist\n" +
-                    "\t-m: compare magic of every file with Arg3 in Game\\");
+                    "\t-p: Path match: provide a path as Arg3 to be hashed and matched against files in `Game\\_unknown`\n" +
+                    "\t-efl: Hash blast the `Game\\map\\entryfilelist`\n" +
+                    "\t-m: Search File Magic: compare magic of every file with Arg3 in `Game\\`\n" +
+                    "\t    use -mb to search inside BNDs, as well\n" +
+                    "\t-b: Search BND Files: compare file name of every file in a BND with Arg3 in `Game\\`.\n" +
+                    "\t    -be to search file names without an extension\n" +
+                "Arg3: Arguments for the specified switch");
         }
 
         private static void PathMatch(string gamePath, string path)
         {
-     
+
             Dictionary<ulong, string> unknowns = Util.GetUnkDictionary(gamePath, "*");
             if (unknowns.Count <= 0)
                 throw new Exception($@"No files found in {gamePath}\_unknown");
@@ -111,7 +134,7 @@ namespace Elden_Ring_File_Analysis_Tool
             }
 
         }
-        private static void FileMagicSearch(string gamePath, string magic)
+        private static void FileMagicSearch(string gamePath, string magic, bool bndSearch)
         {
             string[] files = Directory.GetFiles(gamePath, "*", SearchOption.AllDirectories);
 
@@ -138,6 +161,18 @@ namespace Elden_Ring_File_Analysis_Tool
 
                     if (magicString == magic)
                         list.Add($"Matched: {files[i]} with magic {magic}");
+
+                    if (bndSearch && magicString == "BND4")
+                    {
+                        BND4 bnd4 = BND4.Read(bytes);
+                        foreach (BinderFile file in bnd4.Files)
+                        {
+                            magicString = Encoding.UTF8.GetString(file.Bytes, 0, magic.Length);
+
+                            if (magicString == magic)
+                                list.Add($"Matched: {files[i]} with magic {magic}");
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -145,10 +180,50 @@ namespace Elden_Ring_File_Analysis_Tool
                     list.Add(ex.Message);
                 }
 
-           
+
             }
 
         }
 
+        private static void BNDSearch(string gamePath, string fileName, bool extensionless)
+        {
+            string[] files = Directory.GetFiles(gamePath, "*", SearchOption.AllDirectories);
+
+
+            Console.WriteLine($"Searching {files.Length} for file {fileName}");
+
+            List<string> list = new();
+            Console.CursorVisible = false;
+            for (int i = 0; i < files.Length; i++)
+            {
+                try
+                {
+                    Console.SetCursorPosition(0, 0);
+                    Console.WriteLine(new string(' ', 255));
+                    Console.WriteLine(new string(' ', 255));
+                    Console.SetCursorPosition(0, 0);
+                    Console.WriteLine($"{i}/{files.Length}");
+                    Console.WriteLine(files[i]);
+                    Console.WriteLine(string.Join("\n", list));
+
+                    if (!BND4.IsRead(files[i], out BND4 bnd))
+                        continue;
+
+                    foreach (BinderFile file in bnd.Files)
+                    {
+                        string bndFileName = extensionless ? Path.GetFileNameWithoutExtension(file.Name) : Path.GetFileName(file.Name);
+
+                        if (bndFileName == fileName)
+                            list.Add($"Matched: {files[i]} with path {fileName}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    list.Add($"Error in: {files[i]}");
+                    list.Add(ex.Message);
+                }
+           
+            }
+        }
     }
 }
